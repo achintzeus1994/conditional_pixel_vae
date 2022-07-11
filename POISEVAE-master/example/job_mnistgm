@@ -1,0 +1,5 @@
+for r in {2..5}; do
+    for i in {0..9}; do
+        python3 MNIST_GM.py --foldername="rad${r}_${i}" --radius=$r
+    done
+done
