@@ -203,7 +203,7 @@ class POISEVAE(nn.Module):
 
         return param1, param2
     
-    def decode(self, z):
+    def decode(self, z, **kwargs):
         """
         Unsqueeze the samples from each latent space (if necessary), and decode
         Parameter
@@ -221,7 +221,7 @@ class POISEVAE(nn.Module):
             z = [zi.flatten(0, 1) for zi in z]
         for decoder, zi, ld in zip(self.decoders, z, self.latent_dims):
             zi = zi.view(batch_size * n_samples, *ld) # Match the shape to the output
-            x_ = decoder(zi)
+            x_ = decoder(zi, **kwargs)
             if Gibbs_dim: # Gibbs dimension
                 aux = x_[0].view(batch_size, n_samples, *x_[0].shape[1:])
                 x_ = (aux,) if len(x_) == 1 else (aux, *x_[1:])
@@ -287,7 +287,7 @@ class POISEVAE(nn.Module):
         t2 = [-torch.exp(t2_hat) for t2_hat in self.t2_hat]
         return self.t1, t2
     
-    def forward(self, x, n_gibbs_iter=15, kl_weight=1, detach_G=False):
+    def forward(self, x, n_gibbs_iter=15, kl_weight=1, detach_G=False, **kwargs):
         """
         Return
         ------
@@ -333,13 +333,15 @@ class POISEVAE(nn.Module):
         # assert torch.isnan(z_posteriors[0]).sum() == 0
         # assert torch.isnan(z_posteriors[1]).sum() == 0
 
-        x_rec = self.decode(z_posteriors) # Decoding
+        x_rec = self.decode(z_posteriors, **kwargs) # Decoding
         # assert torch.isnan(x_rec[0][0]).sum() == 0
         # assert torch.isnan(x_rec[1][0]).sum() == 0
         # Reconstruction loss term *for decoder*
         dec_rec_loss = 0
         if hasattr(self, 'loss'):
-            recs = [loss_func(x_rec[i], x[i]) for i, loss_func in enumerate(self.loss)]
+            print(x_rec[0][0].shape, x[0].shape)
+            print(x_rec[1][0].shape, x[1].shape)
+            recs = [loss_func(x_rec[i][0], x[i]) for i, loss_func in enumerate(self.loss)]
         else:
             recs = []
             for i in range(self.M):
@@ -380,7 +382,7 @@ class POISEVAE(nn.Module):
         return results
 
     
-    def generate(self, n_samples, n_gibbs_iter=15):
+    def generate(self, n_samples, n_gibbs_iter=2, **kwargs):
         self._batch_size = n_samples
         G = self.get_G()
         _, t2 = self.get_t()
@@ -389,7 +391,7 @@ class POISEVAE(nn.Module):
         
         _, z_posteriors, _, _, _ = self._sampling(G, nones, nones, t2, n_iterations=n_gibbs_iter)
 
-        x_rec = self.decode(z_posteriors) # Decoding
+        x_rec = self.decode(z_posteriors, **kwargs) # Decoding
         
         for i in range(self.M):
             x_rec[i] = self.likelihoods[i](*x_rec[i])

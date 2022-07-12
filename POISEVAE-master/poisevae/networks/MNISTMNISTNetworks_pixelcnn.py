@@ -9,7 +9,7 @@ class pixelcnn_decoder(nn.Module):
         self.pixelcnn = pixelcnn
 
     def forward(self, z, img,generate_mode):
-        img_out = img.reshape(z.shape[0],1,28,28).to(z.device)
+        img_out = img.reshape(img.shape[0],1,28,28).to(z.device)
         if generate_mode is False:
             sample = self.pixelcnn(img_out, z )
         else:

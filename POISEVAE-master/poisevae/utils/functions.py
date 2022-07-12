@@ -20,7 +20,7 @@ def _log(results, mode, writer, epoch):
     
     
 def train(model, joint_dataloader, optimizer, epoch, kl_weight, n_gibbs_iter, writer=None,
-          mask_missing=None, detach_G=False, device=_device, dtype=torch.float32):
+          mask_missing=None, detach_G=False, device=_device, dtype=torch.float32, **kwargs):
     '''
     Parameters
     ----------
@@ -52,24 +52,26 @@ def train(model, joint_dataloader, optimizer, epoch, kl_weight, n_gibbs_iter, wr
         if mask_missing is not None:
             results = model(mask_missing(
                             [data[i].to(device=device, dtype=dtype) for i in range(model.M)]), 
-                            kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter, detach_G=detach_G)
+                            kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter, detach_G=detach_G,
+                            **kwargs)
         else:
             results = model([data[i].to(device=device, dtype=dtype) for i in range(model.M)], 
-                            kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter, detach_G=detach_G)
+                            kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter, detach_G=detach_G,
+                            **kwargs)
             
         results['total_loss'].backward() 
         torch.nn.utils.clip_grad_norm_(model.parameters(), 50)
         optimizer.step()
         _log(results, 'train', writer, epoch * len(joint_dataloader) + k)
         
-        inputs.append(data)
-        res.append(results)
+#         inputs.append(data)
+#         res.append(results)
         
     return inputs, res
 
 
 def test(model, joint_dataloader, epoch, kl_weight, n_gibbs_iter, writer=None, 
-         mask_missing=None, device=_device, dtype=torch.float32):
+         mask_missing=None, device=_device, dtype=torch.float32, **kwargs):
     '''
     Parameters
     ----------
@@ -101,15 +103,15 @@ def test(model, joint_dataloader, epoch, kl_weight, n_gibbs_iter, writer=None,
             if mask_missing is not None:
                 results = model(mask_missing(
                                 [data[i].to(device=device, dtype=dtype) for i in range(model.M)]), 
-                                kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter)
+                                kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter, **kwargs)
             else:
                 results = model([data[i].to(device=device, dtype=dtype) for i in range(model.M)], 
-                                kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter)
+                                kl_weight=kl_weight, n_gibbs_iter=n_gibbs_iter, **kwargs)
 
             _log(results, 'test', writer, epoch * len(joint_dataloader) + k)
             
-            inputs.append(data)
-            res.append(results)
+#             inputs.append(data)
+#             res.append(results)
             
     return inputs, res
 
