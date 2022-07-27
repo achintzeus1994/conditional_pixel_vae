@@ -17,5 +17,5 @@ class pixelcnn_decoder(nn.Module):
             count = z.shape[0]
             sample = self.pixelcnn.sample(img_out,shape,count, z )
 #             sample = self.pixelcnn(img_out, z )
-
+#             sample = torch.exp(sample)
         return (sample, )
