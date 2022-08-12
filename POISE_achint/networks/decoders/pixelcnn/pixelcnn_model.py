@@ -126,7 +126,7 @@ class GatedBlock(nn.Module):
 
 class PixelCNN(nn.Module):
     def __init__(self, lat_dim, data_channels, color_levels, causal_ksize=7, hidden_ksize=7, 
-                 hidden_fmaps=15, out_hidden_fmaps=10, hidden_layers=4):
+                 hidden_fmaps=120, out_hidden_fmaps=60, hidden_layers=4):
         """
         Parameters
         ----------

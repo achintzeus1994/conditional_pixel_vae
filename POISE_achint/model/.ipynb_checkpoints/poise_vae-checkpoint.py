@@ -28,8 +28,8 @@ class POISE_VAE(nn.Module):
         return param1, param2
     def decode(self, z, x, generate_mode):
         param = []
-        for i,xi in enumerate(z):
-            ret = self.decoders[i](xi,x[i], generate_mode)
+        for i,zi in enumerate(z):
+            ret = self.decoders[i](zi,x[i], generate_mode)
             param.append(ret)
         return param
     def forward(self, x, generate_mode):
@@ -39,5 +39,5 @@ class POISE_VAE(nn.Module):
         total_loss,rec_loss,kl_loss = self.loss_calc.loss(x, x_rec, param1, param2, generate_mode)
  
         results = {'data':x,'x_rec': x_rec,
-            'total_loss': total_loss, 'rec_losses': rec_loss, 'KL_loss': kl_loss}
+            'total_loss': total_loss, 'rec_losses': rec_loss, 'KL_loss': kl_loss, 'z_posteriors': z_posteriors}
         return results

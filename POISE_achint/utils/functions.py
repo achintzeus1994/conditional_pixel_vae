@@ -31,3 +31,20 @@ def plotting(model, data, x_rec):
                 ax[j+2*m, i].imshow(im.cpu().numpy().reshape(28, 28), cmap='gray')
                 ax[j+2*m, i].set_axis_off()
     fig.tight_layout(pad=0)
+    
+    
+def save_checkpoint(model, optimizer, save_path, epoch):
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'epoch': epoch
+    }, save_path)
+
+def load_checkpoint(model, optimizer=None, load_path='.'):
+    checkpoint = torch.load(load_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    if optimizer is not None:
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    epoch = checkpoint['epoch']
+    
+    return model, optimizer, epoch

@@ -39,5 +39,5 @@ class POISE_VAE(nn.Module):
         total_loss,rec_loss,kl_loss = self.loss_calc.loss(x, x_rec, param1, param2, generate_mode)
  
         results = {'data':x,'x_rec': x_rec,
-            'total_loss': total_loss, 'rec_losses': rec_loss, 'KL_loss': kl_loss}
+            'total_loss': total_loss, 'rec_losses': rec_loss, 'KL_loss': kl_loss, 'z_posteriors': z_posteriors}
         return results
